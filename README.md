@@ -130,14 +130,24 @@ Here's a [link to my video result](./pipeline_video.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+##### Implementation
 
-Using the Perspective Transform and a calibrated camera, I was able to do a "birds-eye" view of the lane ahead. Once with the bird's eye view image, by converting the image to HLS color space and isolating the S and L channels, a Thresholded Binary Image was created to filter out any pixels that don't belong to the lane lines. 
+Using the Perspective Transform and a calibrated camera, I was able to do a "birds-eye" view of the lane ahead. Once with the bird's eye view image, by converting the image to HLS color space and isolating the S and L channels, a Thresholded Binary Image was created to filter out any pixels that don't belong to the lane lines and to compensate for shadows and changes of colors of the lane lines. 
 
 The thresholded binary image was then processed through a few functions to detect the lanes and its curvature. To detect the lanes, I generated a histogram using half the image to estimate the start of the lanes, then using the "sliding window" approach, the rest of the lane was found. Then we fitted a polynomial to achieve a better fit. Using a few math equations, the curvature of the lane and the center of the vehicle in respect to the lane were acquired.
 
 Finally, the lane was drawn on top of the original frame. This pipeline was used to process a video to show how the pipeline worked on a real case scenario.
 
-Most issues were in regards to proper detection of lane lines during transitions of different pavements and when shadows affected the lanes. The current pipeline works most of the time, but its not perfect. In a road with lots of shade and trees, it will most likely fail. Another big concern is that all of the images used to test this pipeline did not have another car/vehicle in close proximity on the same lane. I wonder if the algorithm would get very confused when detecting lanes, since there will be an object there that can interfere with the current algorithm. 
+##### Issues
 
-Definitely I would try testing this on more different roads and scenarios to understand its performance better.
+Most issues were in regards to proper detection of lane lines during transitions of different pavements and when shadows affected the lanes. Most of my time was spent making sure the lane lines were properly detected even when shadows or changes of color affected the image. After trying many combinations of the HLS channels and thresholds, I found that by using both channels S and L in combination with the `cv.Sobel()` of the L-Channel, a good binary image was obtained, even when under the presence of shadows, etc...
+
+##### Where can the pipeline fail?
+
+ Pipeline could fail when another car/vehicle is in close proximity on the same lane, in front of our vehicle. The current lane algorithm could hypothetically fail in this situation. Another potential issue could be when running our pipeline with images or video acquired during the night. Our pipeline could face problems here.
+
+##### Possible Solutions
+
+In regards to the car/vehicle in close proximity issue, one possible solution could be to use deep learning to identify the vehicle in the image and its location, then remove it from the image before performing our pipeline.
+
+For lane detection during the night, different thresholds for the binary image creation might be used that perform better.
